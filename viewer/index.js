@@ -8,7 +8,13 @@ app.model({
     update: function (state, data) {
       return { title: data }
     }
-  }
+  },
+
+  subscriptions: [
+
+    
+
+  ]
 })
 
 function mainView (state, prev, send) {
