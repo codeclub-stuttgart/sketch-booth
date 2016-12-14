@@ -1,0 +1,18 @@
+{
+  "name": "sketch-booth",
+  "version": "1.0.0",
+  "description": "take pictures of sketches with a smartphone and transfer them to an usb stick",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "GitHub",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    "choo": "^4.0.1"
+  }
+}
