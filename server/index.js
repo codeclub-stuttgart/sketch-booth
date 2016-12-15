@@ -1,9 +1,19 @@
 const path = require('path')
 const express = require('express')
 const multer  = require('multer')
-const upload = multer({ dest: path.join(__dirname, '../sketches') })
 
 const app = express()
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../sketches'))
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}.svg`)
+  }
+})
+
+const upload = multer({ storage })
 
 app.post('/sketch', upload.single('sketch'), (req, res) => {
 

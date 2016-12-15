@@ -6,11 +6,11 @@
   </head>
   <body>
 
-    <form method="post" action="/sketch" enctype="multipart/form-data" id="form">
-      <input type="file" name="sketch" id="fileinput">
-    </form>
 
-    <div id="preview">
+    <input type="file" name="sketch" id="fileinput">
+
+
+    <img id="preview">
 
 
     <script src="./vendor/potrace.js"></script>
@@ -23,6 +23,8 @@
         var form = document.getElementById('form');
         var fileInput = document.getElementById('fileinput');
         var preview = document.getElementById('preview');
+        var file;
+
 
         fileInput.addEventListener('change', function (e) {
           var fileList = e.target.files;
@@ -32,8 +34,29 @@
             Potrace.loadImageFromFile(fileList[0]);
 
             Potrace.process(function () {
+              var data = new Blob([Potrace.getSVG(1)], {type: 'image/svg+xml'});
 
-              preview.innerHTML = Potrace.getSVG(1)
+              if (file !== null) {
+                window.URL.revokeObjectURL(file);
+              }
+
+              file = window.URL.createObjectURL(data)
+
+
+              preview.src = file;
+
+
+              var formData = new FormData();
+              formData.append('sketch', data, 'sketch.svg');
+
+
+              var request = new XMLHttpRequest();
+              request.open('POST', '/sketch');
+              request.send(formData);
+
+              console.log('send request');
+
+
             })
           }
         })

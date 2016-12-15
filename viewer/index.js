@@ -3,34 +3,65 @@ const update = require('immutability-helper')
 const chokidar = require('chokidar')
 const html = require('choo/html')
 const choo = require('choo')
+const classNames = require('classnames')
 
 const app = choo()
 
 app.model({
   state: {
-    sketches: []
+    sketches: {}
   },
+
+  effects: {
+    loadFile: (state, { path }, send) => {
+      const img = new Image()
+
+      // this is required to handle files which already exist and are not currently uploaded
+      img.src = path
+      img.onload = () => {
+        console.log('loaded')
+
+        send('setFileStatus', { path, loading: false }, _.noop)
+      }
+
+      send('addFile', { path }, _.noop)
+    }
+  },
+
   reducers: {
-    addFile: (state, {sketch}) => {
+    addFile: (state, { path }) => {
       return update(state, {
-        sketches: {$push: [sketch]}
+        sketches: { [path]: { $set: { path, loading: true } } }
       })
     },
 
-    removeFile: (state, {sketch}) => {
-      const newSketches = _.filter(state.sketches, (otherSketch) => otherSketch !== sketch)
+    removeFile: (state, { path }) => {
+      const newSketches = _.omitBy(state.sketches, (sketch) => sketch.path !== path)
 
       return update(state, {
-        sketches: {$set: newSketches}
+        sketches: { $set: newSketches }
+      })
+    },
+
+    setFileStatus: (state, { path, loading }) => {
+      return update(state, {
+        sketches: {
+          [path]: { loading: { $set: loading } }
+        }
       })
     }
   },
 
   subscriptions: {
     fileWatcher: (send) => {
-      chokidar.watch('sketches', {ignored: /[\/\\]\./})
-        .on('add', (file) => send('addFile', { sketch: file }, _.noop))
-        .on('unlink', (file) => send('removeFile', { sketch: file }, _.noop));
+      chokidar.watch('sketches', { ignored: /[\/\\]\./ })
+        .on('add', (path) => send('loadFile', { path }, _.noop))
+        .on('change', _.debounce((path) => {
+          console.log('change')
+
+          send('setFileStatus', { path, loading: false }, _.noop)
+        }, 500))
+        .on('unlink', (path) => send('removeFile', { path }, _.noop));
     }
   }
 })
@@ -50,10 +81,24 @@ function mainView(state, prev, send) {
   }
 }
 
-function sketchListView ({ sketches }) {
-  const sketchItemsHTML = _.map(sketches, (sketch) => html`
-    <div class="sketch" style="background-image: url(${sketch})"></div>
-  `)
+function sketchListView({ sketches }) {
+  console.log('rerender sketchlist')
+
+  const sketchItemsHTML = _.map(sketches, (sketch) => {
+    let spinnerHTML, style;
+
+    if (sketch.loading) {
+      spinnerHTML = html`<img class='spinner' src="assets/spinner.svg">`
+    } else {
+      style = `background-image: url(${sketch.path})`
+    }
+
+    return html`
+      <div class="sketch" style="${style}">
+        ${spinnerHTML}
+      </div>
+    `
+  })
 
   return html`
     <div class="sketches">
