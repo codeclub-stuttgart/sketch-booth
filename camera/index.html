@@ -6,12 +6,41 @@
   </head>
   <body>
 
-    <form method="post" action="/sketch" enctype="multipart/form-data">
-      <input type="file" name="sketch">
-
-      <button>upload</button>
+    <form method="post" action="/sketch" enctype="multipart/form-data" id="form">
+      <input type="file" name="sketch" id="fileinput">
     </form>
 
+    <div id="preview">
+
+
+    <script src="./vendor/potrace.js"></script>
+    <script>
+
+
+      (function () {
+        'use strict'
+
+        var form = document.getElementById('form');
+        var fileInput = document.getElementById('fileinput');
+        var preview = document.getElementById('preview');
+
+        fileInput.addEventListener('change', function (e) {
+          var fileList = e.target.files;
+
+
+          if (fileList.length > 0) {
+            Potrace.loadImageFromFile(fileList[0]);
+
+            Potrace.process(function () {
+
+              preview.innerHTML = Potrace.getSVG(1)
+            })
+          }
+        })
+
+      }())
+
+    </script>
 
   </body>
 </html>
