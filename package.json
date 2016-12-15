@@ -20,6 +20,7 @@
     "express": "^4.14.0",
     "immutability-helper": "^2.0.0",
     "lodash": "^4.17.2",
-    "multer": "^1.2.1"
+    "multer": "^1.2.1",
+    "uid": "0.0.2"
   }
 }
