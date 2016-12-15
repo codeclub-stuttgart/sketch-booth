@@ -59,9 +59,14 @@ app.model({
 })
 
 function mainView(state, prev, send) {
+  const sketches = _(state.sketches)
+    .sortBy('path')
+    .reverse()
+    .value()
+
   return html`
     <main>
-      ${sketchListView({ sketches: state.sketches })}
+      ${sketchListView({ sketches })}
     </main>
   `
 
