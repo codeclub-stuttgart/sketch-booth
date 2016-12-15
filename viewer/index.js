@@ -56,11 +56,7 @@ app.model({
     fileWatcher: (send) => {
       chokidar.watch('sketches', { ignored: /[\/\\]\./ })
         .on('add', (path) => send('loadFile', { path }, _.noop))
-        .on('change', _.debounce((path) => {
-          console.log('change')
-
-          send('setFileStatus', { path, loading: false }, _.noop)
-        }, 500))
+        .on('change', _.debounce((path) => send('setFileStatus', { path, loading: false }, _.noop), 1000))
         .on('unlink', (path) => send('removeFile', { path }, _.noop));
     }
   }
@@ -88,7 +84,13 @@ function sketchListView({ sketches }) {
     let spinnerHTML, style;
 
     if (sketch.loading) {
-      spinnerHTML = html`<img class='spinner' src="assets/spinner.svg">`
+      spinnerHTML = html`
+        <div class="spinner">
+          <div class="bounce1"></div>
+          <div class="bounce2"></div>
+          <div class="bounce3"></div>
+        </div>
+      `
     } else {
       style = `background-image: url(${sketch.path})`
     }

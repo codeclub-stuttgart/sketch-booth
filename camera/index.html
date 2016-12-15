@@ -2,67 +2,60 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta name="theme-color" content="#f44336">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sketch booth</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
 
+    <main class="app" id="app">
+      <label class='capture-button' for="fileinput">Foto machen</label>
+      <input class='snapshot' type="file" name="sketch" id="fileinput">
 
-    <input type="file" name="sketch" id="fileinput">
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
 
-
-    <img id="preview">
-
+    </main>
 
     <script src="./vendor/potrace.js"></script>
     <script>
-
-
       (function () {
         'use strict'
 
+        var app = document.getElementById('app')
         var form = document.getElementById('form');
         var fileInput = document.getElementById('fileinput');
         var preview = document.getElementById('preview');
-        var file;
-
 
         fileInput.addEventListener('change', function (e) {
           var fileList = e.target.files;
 
-
           if (fileList.length > 0) {
-            Potrace.loadImageFromFile(fileList[0]);
+            app.classList.add('is-loading')
+            Potrace.loadImageFromFile(fileList[0])
 
-            Potrace.process(function () {
-              var data = new Blob([Potrace.getSVG(1)], {type: 'image/svg+xml'});
+            setTimeout(() => {
+              Potrace.process(function () {
+                app.classList.remove('is-loading')
 
-              if (file !== null) {
-                window.URL.revokeObjectURL(file);
-              }
+                var data = new Blob([Potrace.getSVG(0.1)], { type: 'image/svg+xml' });
 
-              file = window.URL.createObjectURL(data)
+                var formData = new FormData();
+                formData.append('sketch', data, 'sketch.svg');
 
-
-              preview.src = file;
-
-
-              var formData = new FormData();
-              formData.append('sketch', data, 'sketch.svg');
-
-
-              var request = new XMLHttpRequest();
-              request.open('POST', '/sketch');
-              request.send(formData);
-
-              console.log('send request');
-
-
-            })
+                var request = new XMLHttpRequest();
+                request.open('POST', '/sketch');
+                request.send(formData);
+              })
+            }, 250);
           }
         })
 
-      }())
-
+      }());
     </script>
 
   </body>
