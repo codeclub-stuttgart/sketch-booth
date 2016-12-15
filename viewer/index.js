@@ -18,11 +18,7 @@ app.model({
 
       // this is required to handle files which already exist and are not currently uploaded
       img.src = path
-      img.onload = () => {
-        console.log('loaded')
-
-        send('setFileStatus', { path, loading: false }, _.noop)
-      }
+      img.onload = () => send('setFileStatus', { path, loading: false }, _.noop)
 
       send('addFile', { path }, _.noop)
     }
@@ -65,10 +61,7 @@ app.model({
 function mainView(state, prev, send) {
   return html`
     <main>
-      <h1>Sketches</h1>
-      
       ${sketchListView({ sketches: state.sketches })}
-      
     </main>
   `
 
@@ -81,10 +74,10 @@ function sketchListView({ sketches }) {
   console.log('rerender sketchlist')
 
   const sketchItemsHTML = _.map(sketches, (sketch) => {
-    let spinnerHTML, style;
+    let contentHTML;
 
     if (sketch.loading) {
-      spinnerHTML = html`
+      contentHTML = html`
         <div class="spinner">
           <div class="bounce1"></div>
           <div class="bounce2"></div>
@@ -92,12 +85,12 @@ function sketchListView({ sketches }) {
         </div>
       `
     } else {
-      style = `background-image: url(${sketch.path})`
+      contentHTML = html`<img src="${sketch.path}" draggable>`
     }
 
     return html`
-      <div class="sketch" style="${style}">
-        ${spinnerHTML}
+      <div class="sketch">
+        ${contentHTML}
       </div>
     `
   })
