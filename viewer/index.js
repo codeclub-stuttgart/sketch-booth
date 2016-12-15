@@ -52,13 +52,13 @@ function mainView(state, prev, send) {
 
 function sketchListView ({ sketches }) {
   const sketchItemsHTML = _.map(sketches, (sketch) => html`
-    <li><img src="${sketch}"></li>
+    <div class="sketch" style="background-image: url(${sketch})"></div>
   `)
 
   return html`
-    <ul>
+    <div class="sketches">
       ${sketchItemsHTML}
-    </ul>
+    </div>
   `
 }
 
