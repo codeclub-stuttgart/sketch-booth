@@ -14,8 +14,11 @@
     "electron": "^1.4.1"
   },
   "dependencies": {
+    "chokidar": "^1.6.1",
     "choo": "^4.0.1",
     "express": "^4.14.0",
+    "immutability-helper": "^2.0.0",
+    "lodash": "^4.17.2",
     "multer": "^1.2.1"
   }
 }
