@@ -10,6 +10,7 @@
   <body>
 
     <main class="app" id="app">
+
       <label class='capture-button' for="fileinput">Foto machen</label>
       <input class='snapshot' type="file" name="sketch" id="fileinput">
 
@@ -26,34 +27,73 @@
       (function () {
         'use strict'
 
+        var IMAGE_SIZE = 300
+
         var app = document.getElementById('app')
         var form = document.getElementById('form');
         var fileInput = document.getElementById('fileinput');
         var preview = document.getElementById('preview');
+        var url;
 
         fileInput.addEventListener('change', function (e) {
           var fileList = e.target.files;
 
           if (fileList.length > 0) {
+
+            if (url) {
+              window.URL.revokeObjectURL(url);
+            }
+
+            url = window.URL.createObjectURL(fileList[0])
+
             app.classList.add('is-loading')
-            Potrace.loadImageFromFile(fileList[0])
 
-            setTimeout(() => {
-              Potrace.process(function () {
-                app.classList.remove('is-loading')
+            getScaledImageFile(url, IMAGE_SIZE, function (file) {
 
-                var data = new Blob([Potrace.getSVG(0.1)], { type: 'image/svg+xml' });
+              Potrace.loadImageFromFile(fileList[0])
 
-                var formData = new FormData();
-                formData.append('sketch', data, 'sketch.svg');
+              setTimeout(function () {
+                Potrace.process(function () {
+                  app.classList.remove('is-loading')
 
-                var request = new XMLHttpRequest();
-                request.open('POST', '/sketch');
-                request.send(formData);
-              })
-            }, 250);
+                  var data = new Blob([Potrace.getSVG(0.1)], { type: 'image/svg+xml' });
+
+                  var formData = new FormData();
+                  formData.append('sketch', data, 'sketch.svg');
+
+                  var request = new XMLHttpRequest();
+                  request.open('POST', '/sketch');
+                  request.send(formData);
+                })
+              }, 250);
+            });
           }
         })
+
+        function getScaledImageFile (url, size, callback) {
+          var image = new Image();
+          image.src = url;
+          image.onload = function () {
+            var scale;
+
+            if (image.width > image.height) {
+              scale = size / image.width
+
+            } else {
+              scale = size / image.height
+            }
+
+            var scaledWidth = image.width * scale
+            var scaledHeight = image.height * scale
+            var canvas = document.createElement('canvas');
+            canvas.width = scaledWidth;
+            canvas.height = scaledHeight;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, scaledWidth, scaledHeight)
+
+            canvas.toBlob(callback)
+          }
+        }
 
       }());
     </script>
